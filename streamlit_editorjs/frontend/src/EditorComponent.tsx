@@ -65,6 +65,7 @@ export default function EditorComponent() {
     tools: {},
     debounce_ms: 500,
   });
+  const [theme, setTheme] = useState<Record<string, any> | undefined>(undefined);
   const toolsSignature = stableStringify(args.tools ?? {});
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export default function EditorComponent() {
         tools: nextArgs.tools ?? {},
         debounce_ms: nextArgs.debounce_ms ?? 500,
       });
+      setTheme(data.theme);
     });
   }, []);
 
@@ -164,7 +166,9 @@ export default function EditorComponent() {
       style={{
         minHeight: `${args.height ?? 500}px`,
         padding: "8px",
-        background: "white",
+        background: "transparent",
+        color: theme?.textColor ?? "inherit",
+        fontFamily: theme?.font ?? "inherit",
       }}
     >
       <style>{`

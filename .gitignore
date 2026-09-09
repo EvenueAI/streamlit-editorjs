@@ -213,3 +213,6 @@ node_modules/
 
 # Mac
 .DS_Store
+# Ship the built component with the package (needed for pip install from git).
+!streamlit_editorjs/frontend/dist/
+!streamlit_editorjs/frontend/dist/**

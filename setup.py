@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="streamlit-editorjs",
-    version="0.1.0",
+    version="0.2.0",
     description="Editor.js custom component for Streamlit",
     packages=find_packages(),
     include_package_data=True,
