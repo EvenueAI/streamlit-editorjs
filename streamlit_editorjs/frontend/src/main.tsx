@@ -1,9 +1,6 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import EditorComponent from "./EditorComponent";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <EditorComponent />
-  </React.StrictMode>
-);
+// No StrictMode: its dev double-mount creates the editor twice, leaving a
+// stray empty block behind.
+ReactDOM.createRoot(document.getElementById("root")!).render(<EditorComponent />);

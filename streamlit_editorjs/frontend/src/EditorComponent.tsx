@@ -77,6 +77,11 @@ export default function EditorComponent() {
     debounce_ms: 500,
   });
   const [theme, setTheme] = useState<Record<string, any> | undefined>(undefined);
+  // The editor is built only after the first Streamlit payload, so it is
+  // created straight from the real document. Creating it from the empty
+  // DEFAULT_DOC and rendering the real value on top leaves Editor.js's
+  // initial empty block in place — the stray leading paragraph.
+  const [argsReceived, setArgsReceived] = useState(false);
   const toolsSignature = stableStringify(args.tools ?? {});
 
   useEffect(() => {
@@ -91,11 +96,12 @@ export default function EditorComponent() {
         debounce_ms: nextArgs.debounce_ms ?? 500,
       });
       setTheme(data.theme);
+      setArgsReceived(true);
     });
   }, []);
 
   useEffect(() => {
-    if (!holderRef.current || initializedRef.current) {
+    if (!argsReceived || !holderRef.current || initializedRef.current) {
       return;
     }
 
@@ -148,7 +154,7 @@ export default function EditorComponent() {
       editorRef.current = null;
       initializedRef.current = false;
     };
-  }, [args.debounce_ms, args.placeholder, args.read_only, toolsSignature]);
+  }, [argsReceived, args.debounce_ms, args.placeholder, args.read_only, toolsSignature]);
 
   useEffect(() => {
     const incoming = args.value ?? DEFAULT_DOC;
@@ -161,7 +167,9 @@ export default function EditorComponent() {
     const reload = async () => {
       try {
         await editorRef.current!.isReady;
-        await editorRef.current!.render(incoming);
+        // blocks.render clears existing blocks first; plain render() would
+        // leave the current content in place and prepend the new blocks.
+        await editorRef.current!.blocks.render(incoming);
         lastLoadedRef.current = incomingSerialized;
         setTimeout(() => setFrameHeight(), 20);
       } catch (error) {
