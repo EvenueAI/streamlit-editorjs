@@ -25,7 +25,7 @@ const DEFAULT_DOC: OutputData = {
 };
 
 function buildTools(customTools: Record<string, any> = {}): Record<string, any> {
-  return {
+  const tools: Record<string, any> = {
     header: {
       class: Header,
       inlineToolbar: true,
@@ -47,6 +47,14 @@ function buildTools(customTools: Record<string, any> = {}): Record<string, any> 
     },
     ...customTools,
   };
+  // A tool explicitly set to null from Python is removed entirely, so a
+  // field can offer a paragraphs-only editor (e.g. a title or excerpt).
+  for (const key of Object.keys(tools)) {
+    if (customTools[key] === null) {
+      delete tools[key];
+    }
+  }
+  return tools;
 }
 
 export default function EditorComponent() {
