@@ -25,6 +25,9 @@ const DEFAULT_DOC: OutputData = {
 };
 
 function buildTools(customTools: Record<string, any> = {}): Record<string, any> {
+  // The built-in entries merge Python config over their defaults but must
+  // keep their JS `class` — only tools we don't define pass through whole.
+  const { header, list, quote, ...extraTools } = customTools;
   const tools: Record<string, any> = {
     header: {
       class: Header,
@@ -33,19 +36,19 @@ function buildTools(customTools: Record<string, any> = {}): Record<string, any> 
         levels: [2, 3, 4],
         defaultLevel: 2,
       },
-      ...customTools.header,
+      ...header,
     },
     list: {
       class: List,
       inlineToolbar: true,
-      ...customTools.list,
+      ...list,
     },
     quote: {
       class: Quote,
       inlineToolbar: true,
-      ...customTools.quote,
+      ...quote,
     },
-    ...customTools,
+    ...extraTools,
   };
   // A tool explicitly set to null from Python is removed entirely, so a
   // field can offer a paragraphs-only editor (e.g. a title or excerpt).
