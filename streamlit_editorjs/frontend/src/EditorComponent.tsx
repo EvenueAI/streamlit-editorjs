@@ -25,7 +25,10 @@ const DEFAULT_DOC: OutputData = {
 };
 
 function buildTools(customTools: Record<string, any> = {}): Record<string, any> {
-  return {
+  // The built-in entries merge Python config over their defaults but must
+  // keep their JS `class` — only tools we don't define pass through whole.
+  const { header, list, quote, ...extraTools } = customTools;
+  const tools: Record<string, any> = {
     header: {
       class: Header,
       inlineToolbar: true,
@@ -33,20 +36,28 @@ function buildTools(customTools: Record<string, any> = {}): Record<string, any> 
         levels: [2, 3, 4],
         defaultLevel: 2,
       },
-      ...customTools.header,
+      ...header,
     },
     list: {
       class: List,
       inlineToolbar: true,
-      ...customTools.list,
+      ...list,
     },
     quote: {
       class: Quote,
       inlineToolbar: true,
-      ...customTools.quote,
+      ...quote,
     },
-    ...customTools,
+    ...extraTools,
   };
+  // A tool explicitly set to null from Python is removed entirely, so a
+  // field can offer a paragraphs-only editor (e.g. a title or excerpt).
+  for (const key of Object.keys(tools)) {
+    if (customTools[key] === null) {
+      delete tools[key];
+    }
+  }
+  return tools;
 }
 
 export default function EditorComponent() {
@@ -65,6 +76,7 @@ export default function EditorComponent() {
     tools: {},
     debounce_ms: 500,
   });
+  const [theme, setTheme] = useState<Record<string, any> | undefined>(undefined);
   const toolsSignature = stableStringify(args.tools ?? {});
 
   useEffect(() => {
@@ -78,6 +90,7 @@ export default function EditorComponent() {
         tools: nextArgs.tools ?? {},
         debounce_ms: nextArgs.debounce_ms ?? 500,
       });
+      setTheme(data.theme);
     });
   }, []);
 
@@ -164,7 +177,9 @@ export default function EditorComponent() {
       style={{
         minHeight: `${args.height ?? 500}px`,
         padding: "8px",
-        background: "white",
+        background: "transparent",
+        color: theme?.textColor ?? "inherit",
+        fontFamily: theme?.font ?? "inherit",
       }}
     >
       <style>{`
